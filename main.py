@@ -56,6 +56,25 @@ async def get_config():
     }
 
 
+@app.websocket("/ws/chat")
+async def chat_ws(websocket: WebSocket):
+    """Simple websocket chat endpoint that echoes incoming messages.
+
+    This simulates chatbot-style traffic without calling an actual LLM. The
+    client can send text messages and the server replies with a prefixed
+    acknowledgment. Useful for exercising WebSocket load handling.
+    """
+    await websocket.accept()
+    try:
+        while True:
+            text = await websocket.receive_text()
+            # pretend to "process" the message then echo it back
+            await websocket.send_text(f"You said: {text}")
+    except WebSocketDisconnect:
+        # client closed connection
+        pass
+
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))
